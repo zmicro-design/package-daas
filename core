@@ -1,0 +1,63 @@
+#!/bin/bash
+
+install() {
+  # prepare vars
+  local name="$PACKAGE_DAAS_NAME"
+
+  log::info "[$(timestamp)][package][$name] preparing ..."
+
+  # get system os/arch
+  local arch="$PACKAGE_OS_ARCH"
+  local kernel="$PACKAGE_OS_KERNEL"
+  local platform="$PACKAGE_OS_PLATFORM"
+  # usr_bin_dir
+  local usr_bin_dir="$PACKAGE_USER_BIN_DIR"
+  local tmp_dir="$PACKAGE_TMP_DIR"
+
+  # get latest version
+  if [ -n "$PACKAGE_DAAS_GIT_REPOSITORY" ]; then
+    log::info "[$(timestamp)][package][$name] checking latest version ..."
+    local latest_version=$(git::get_remote_latest_tag $PACKAGE_DAAS_GIT_REPOSITORY)
+    if [ "$?" != "0" ]; then
+      log::error "[$(timestamp)][package][$name] failed to get latest version ."
+      return 1
+    fi
+    PACKAGE_DAAS_VERSION=$latest_version
+    log::success "[$(timestamp)][package][$name] latest version: $PACKAGE_DAAS_VERSION"
+  fi
+
+  # files
+  local tmp_file="$name.tar.gz"
+  local bin_file="./database-as-a-service"
+
+  # prepare context
+  cd $tmp_dir
+
+  # reference: https://github.com/go-zoox/database-as-a-service/releases
+  # example:
+  #   https://github.com/go-zoox/database-as-a-service/releases/download/v0.0.2/database-as-a-service_0.0.2_darwin_amd64.tar.gz
+  #   https://github.com/go-zoox/database-as-a-service/releases/download/v0.0.2/database-as-a-service_0.0.2_darwin_arm64.tar.gz
+  #   https://github.com/go-zoox/database-as-a-service/releases/download/v0.0.2/database-as-a-service_0.0.2_linux_amd64.tar.gz
+  #   https://github.com/go-zoox/database-as-a-service/releases/download/v0.0.2/database-as-a-service_0.0.2_linux_arm64.tar.gz
+  # generate url
+  local url="${PACKAGE_DAAS_RELEASE_DOWNLOAD}/$PACKAGE_DAAS_VERSION/${name}_${PACKAGE_DAAS_VERSION#v}_${platform}_${arch}.tar.gz"
+  log::debug "[$(timestamp)][package][$name][$kernel][$arch] url: $url, file: ${tmp_file}, tmp_dir: $tmp_dir"
+
+  # download
+  log::info "[$(timestamp)][package][$name] downloading ..."
+  os::download $tmp_file $url
+
+  # extract
+  log::info "[$(timestamp)][package][$name] extracting ..."
+  os::extract $tmp_file
+
+  # install
+  log::info "[$(timestamp)][package][$name] installing ..."
+  os::install $bin_file $usr_bin_dir/$name
+
+  # clean
+  log::info "[$(timestamp)][package][$name] cleaning ..."
+  rm -rf $tmp_dir
+}
+
+export -f install

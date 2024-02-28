@@ -1,0 +1,16 @@
+#!/bin/bash
+
+export PACKAGE_DAAS_NAME="daas"
+export PACKAGE_DAAS_ORG="go-zoox"
+export PACKAGE_DAAS_BIN_NAME="$PACKAGE_DAAS_NAME"
+export PACKAGE_DAAS_VERSION=v1.0.1
+
+export PACKAGE_DAAS_GIT_REPOSITORY="https://github.com/${PACKAGE_DAAS_ORG}/database-as-a-service"
+
+export PACKAGE_DAAS_RELEASE_DOWNLOAD="${PACKAGE_DAAS_RELEASE_DOWNLOAD}"
+
+if [ -z "$PACKAGE_DAAS_RELEASE_DOWNLOAD" ]; then
+  export PACKAGE_DAAS_RELEASE_DOWNLOAD="${PACKAGE_DAAS_GIT_REPOSITORY}/releases/download"
+else
+  export PACKAGE_DAAS_GIT_REPOSITORY=""
+fi
