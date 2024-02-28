@@ -28,7 +28,7 @@ install() {
 
   # files
   local tmp_file="$name.tar.gz"
-  local bin_file="./database-as-a-service"
+  local source_bin_file="./$name"
 
   # prepare context
   cd $tmp_dir
@@ -40,8 +40,21 @@ install() {
   #   https://github.com/go-zoox/database-as-a-service/releases/download/v0.0.2/database-as-a-service_0.0.2_linux_amd64.tar.gz
   #   https://github.com/go-zoox/database-as-a-service/releases/download/v0.0.2/database-as-a-service_0.0.2_linux_arm64.tar.gz
   # generate url
-  local url="${PACKAGE_DAAS_RELEASE_DOWNLOAD}/$PACKAGE_DAAS_VERSION/${name}_${PACKAGE_DAAS_VERSION#v}_${platform}_${arch}.tar.gz"
+  local url="${PACKAGE_DAAS_RELEASE_DOWNLOAD}/$PACKAGE_DAAS_VERSION/database-as-a-service_${PACKAGE_DAAS_VERSION#v}_${platform}_${arch}.tar.gz"
   log::debug "[$(timestamp)][package][$name][$kernel][$arch] url: $url, file: ${tmp_file}, tmp_dir: $tmp_dir"
+
+  log::info "[$(timestamp)][package][$name] os: $os"
+  log::info "[$(timestamp)][package][$name] arch: $arch"
+  log::info "[$(timestamp)][package][$name] kernel: $kernel"
+  log::info "[$(timestamp)][package][$name] platform: $platform"
+  log::info "[$(timestamp)][package][$name] usr_bin_dir: $usr_bin_dir"
+  log::info "[$(timestamp)][package][$name] source_bin_file: $source_bin_file"
+  log::info "[$(timestamp)][package][$name] url: $url"
+  log::info "[$(timestamp)][package][$name] tmp_dir: $tmp_dir"
+  log::info "[$(timestamp)][package][$name] tmp_file: $tmp_file"
+  if [ -n "$PLUGIN_PACKAGE_INSTALL_MODE" ]; then
+    log::info "[$(timestamp)][package][$name] mode: $PLUGIN_PACKAGE_INSTALL_MODE"
+  fi
 
   # download
   log::info "[$(timestamp)][package][$name] downloading ..."
@@ -50,10 +63,12 @@ install() {
   # extract
   log::info "[$(timestamp)][package][$name] extracting ..."
   os::extract $tmp_file
+  # @TODO
+  mv ./database-as-a-service $source_bin_file
 
   # install
   log::info "[$(timestamp)][package][$name] installing ..."
-  os::install $bin_file $usr_bin_dir/$name
+  os::install $source_bin_file $usr_bin_dir
 
   # clean
   log::info "[$(timestamp)][package][$name] cleaning ..."
